@@ -93,7 +93,68 @@ const PdfTextExtractor: React.FC<PdfTextExtractorProps> = ({ file }) => {
     }
   };
 
-  // organizeIntoSections function remains the same
+  // Function to organize text into hierarchical sections
+  const organizeIntoSections = (text: string): Section[] => {
+    const lines = text.split('\n');
+    const sections: Section[] = [];
+    let currentSection: Section | null = null;
+    
+    // Generate a unique ID
+    const generateId = () => `section-${Math.random().toString(36).substr(2, 9)}`;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Skip empty lines
+      if (!line) continue;
+      
+      // Heuristic to detect headings - uppercase or ends with colon or starts with numbers
+      const isHeading = line.toUpperCase() === line || 
+                        line.endsWith(':') || 
+                        /^\d+(\.\d+)*\s+/.test(line);
+      
+      // Determine heading level
+      let level = 1;
+      if (isHeading) {
+        if (line.startsWith('  ')) level = 3;
+        else if (line.startsWith(' ')) level = 2;
+        else level = 1;
+      } else {
+        // If it's not a heading, add to current section content
+        if (currentSection) {
+          currentSection.content += (currentSection.content ? '\n' : '') + line;
+        }
+        continue;
+      }
+      
+      // Create a new section
+      const id = generateId();
+      const newSection: Section = {
+        id,
+        title: line,
+        content: '',
+        level,
+        children: []
+      };
+      
+      // Find parent section
+      if (level > 1 && sections.length > 0) {
+        // Find the most recent section with a lower level
+        for (let j = sections.length - 1; j >= 0; j--) {
+          if (sections[j].level < level) {
+            newSection.parent = sections[j].id;
+            sections[j].children.push(id);
+            break;
+          }
+        }
+      }
+      
+      sections.push(newSection);
+      currentSection = newSection;
+    }
+    
+    return sections;
+  };
 
   // Toggle section visibility
   const toggleSection = (id: string) => {
