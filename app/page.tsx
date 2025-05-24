@@ -53,7 +53,7 @@ const Home = () => {
         {file && <PdfTextExtractor file={file} />}
         
         <footer className="mt-16 pt-6 border-t border-zinc-900 text-zinc-600 text-xs font-mono">
-          <p className="text-center">© 2025 DOCUMENT ANALYZER • A MINIMALIST APPROACH TO TEXT EXTRACTION</p>
+          <p className="text-center">© 2025 DOCUMENT ANALYZER</p>
         </footer>
       </div>
     </div>
